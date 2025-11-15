@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-assistant}
+      POSTGRES_USER: ${POSTGRES_USER:-assistant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-assistant}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    depends_on:
+      - db
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-assistant}
+      DB_USER: ${POSTGRES_USER:-assistant}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-assistant}
+      LLM_PROVIDER: ${LLM_PROVIDER:-openai}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-changeme}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+volumes:
+  pgdata:

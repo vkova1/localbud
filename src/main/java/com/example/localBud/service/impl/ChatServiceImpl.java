@@ -1,6 +1,6 @@
 package com.example.localBud.service.impl;
 
-import com.example.localBud.client.OllamaClient;
+import com.example.localBud.client.GeminiClient;
 import com.example.localBud.dto.ChatRequest;
 import com.example.localBud.dto.ChatResponse;
 import com.example.localBud.entity.BusinessContext;
@@ -12,11 +12,11 @@ import org.springframework.stereotype.Service;
 public class ChatServiceImpl implements ChatService {
 
     private final BusinessContextRepository businessContextRepository;
-    private final OllamaClient ollamaClient;
+    private final GeminiClient geminiClient;
 
-    public ChatServiceImpl(BusinessContextRepository businessContextRepository, OllamaClient ollamaClient) {
+    public ChatServiceImpl(BusinessContextRepository businessContextRepository, GeminiClient geminiClient) {
         this.businessContextRepository = businessContextRepository;
-        this.ollamaClient = ollamaClient;
+        this.geminiClient = geminiClient;
     }
 
     public ChatResponse processUserQuery(ChatRequest chatRequest) {
@@ -35,7 +35,7 @@ public class ChatServiceImpl implements ChatService {
                 %s
                 """.formatted(businessContext, chatRequest.userMessage());
 
-        var answer = ollamaClient.ask(prompt);
+        var answer = geminiClient.ask(prompt);
 
         return ChatResponse.builder()
                 .response(answer)

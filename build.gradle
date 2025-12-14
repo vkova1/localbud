@@ -42,6 +42,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
     implementation "io.netty:netty-resolver-dns-native-macos:4.1.110.Final:osx-aarch_64"
+    implementation group: 'com.google.cloud', name: 'google-cloud-aiplatform', version: '3.81.0'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'

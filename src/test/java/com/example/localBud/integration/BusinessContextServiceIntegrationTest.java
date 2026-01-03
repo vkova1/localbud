@@ -1,5 +1,6 @@
 package com.example.localBud.integration;
 
+import com.example.localBud.client.AiClient;
 import com.example.localBud.dto.BusinessContextResponse;
 import com.example.localBud.dto.CreateBusinessContextRequest;
 import com.example.localBud.entity.Business;
@@ -11,13 +12,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(
+        webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+        properties = "ai.enabled=false"
+)
 @AutoConfigureWebTestClient
+@Import(BusinessContextServiceIntegrationTest.AiTestConfig.class)
 public class BusinessContextServiceIntegrationTest {
 
     private static final Long BUSINESS_ID = 1L;
@@ -34,6 +43,16 @@ public class BusinessContextServiceIntegrationTest {
     @BeforeEach
     public void cleanDb() {
         businessContextRepository.deleteAll();
+    }
+
+    @TestConfiguration
+    static class AiTestConfig {
+
+        @Bean
+        @Primary
+        public AiClient aiClient() {
+            return prompt -> "TEST_AI_RESPONSE";
+        }
     }
 
     @Test
@@ -65,7 +84,6 @@ public class BusinessContextServiceIntegrationTest {
     @Test
     void shouldGetBusinessContextById() {
         var business = Business.builder()
-                .id(BUSINESS_ID)
                 .name("Test Business").build();
 
         businessRepository.save(business);

@@ -1,39 +1,49 @@
 package com.example.localBud.client;
 
-import com.google.cloud.aiplatform.v1.*;
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentResponse;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GeminiClient {
+@ConditionalOnProperty(name = "ai.enabled", havingValue = "true", matchIfMissing = true)
+public class GeminiClient implements AiClient {
 
-    // Секретний ключ буде автоматично підтягнутий зі змінних середовища або application.properties
-    // @Value("${gemini.project.id}")
-    private static final String PROJECT_ID = "carbide-datum-480501-h9"; // Введіть ваш ID проєкту
+    private static final String PROJECT_ID = "carbide-datum-480501-h9";
+    private static final String LOCATION = "us-central1";
     private static final String MODEL_ID = "gemini-2.5-flash";
 
+    private volatile Client client;
+
+    private Client client() {
+        if (client == null) {
+            synchronized (this) {
+                if (client == null) {
+                    client = Client.builder()
+                            .vertexAI(true)
+                            .project(PROJECT_ID)
+                            .location(LOCATION)
+                            .build();
+                }
+            }
+        }
+        return client;
+    }
+
+    @Override
     public String ask(String prompt) {
-        var modelName = ModelName.of(PROJECT_ID, "us-central1", MODEL_ID);
+        try {
+            GenerateContentResponse response =
+                    client().models.generateContent(MODEL_ID, prompt, null);
 
-        var content = Content.newBuilder()
-                .addParts(Part.newBuilder().setText(prompt).build())
-                .setRole("user")
-                .build();
-
-        var request = GenerateContentRequest.newBuilder()
-                .setModel(modelName.toString())
-                .addContents(content)
-                .build();
-
-        try (PredictionServiceClient client = PredictionServiceClient.create()) {
-            GenerateContentResponse response = client.generateContent(request);
-
-            return response.getCandidates(0).getContent().getParts(0).getText();
+            String text = response.text();
+            return (text == null || text.trim().isEmpty())
+                    ? "AI did not return a response."
+                    : text;
 
         } catch (Exception e) {
-            //TODO
-            System.err.println("Помилка під час виклику Gemini API: " + e.getMessage());
-            // Важливо: обробка помилок тут має бути більш надійною
-            return "Виникла помилка під час обробки запиту AI.";
+            System.err.println("Gemini API error: " + e.getMessage());
+            return "Виникла помилка під час обробки AI-запиту.";
         }
     }
 }

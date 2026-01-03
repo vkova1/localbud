@@ -44,6 +44,8 @@ dependencies {
     implementation "io.netty:netty-resolver-dns-native-macos:4.1.110.Final:osx-aarch_64"
     implementation group: 'com.google.cloud', name: 'google-cloud-aiplatform', version: '3.81.0'
 
+    implementation "com.google.cloud:google-cloud-aiplatform:3.81.0"
+    implementation "com.google.genai:google-genai:1.32.0"
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -51,8 +53,10 @@ dependencies {
     testImplementation 'com.github.database-rider:rider-spring:1.41.0'
     testImplementation 'com.github.database-rider:rider-junit5:1.41.0'
     testImplementation 'com.github.database-rider:rider-core:1.41.0'
+    testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+    systemProperty 'spring.profiles.active', 'test'
 }

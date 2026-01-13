@@ -12,8 +12,8 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("https://localbud---vista.web.app")
+                registry.addMapping("/api/chat/**")
+                        .allowedOriginPatterns("https://*")
                         .allowedMethods("POST", "OPTIONS")
                         .allowedHeaders("Content-Type")
                         .maxAge(3600);
